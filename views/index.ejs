@@ -1,8 +1,38 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
-    Hello World!
+    <main>
+        <a v-for="room in roomList"
+           :href="'/room/'+room.id"
+        >
+            {{ room.title }}
+        </a>
+    </main>
 </body>
+<script>
+    const app = new Vue({
+        el: 'main',
+        data: {
+            message: "Hello World!",
+            roomList: [],
+        },
+        created() {
+            this.updateData();
+        },
+        methods: {
+            updateData() {
+                // get rooms
+                axios.get('/api/room/list').then((res) => {
+                    this.roomList = res.data.roomList;
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }
+        },
+    });
+</script>
 </html>

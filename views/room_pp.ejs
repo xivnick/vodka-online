@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/room_pp.css"/>
+</head>
+<body>
+    <header>
+        <h1>VODKA online</h1>
+        <div id="user-info">
+            <% if(username) { %>
+                안녕하세요, <%= username %> 님!
+                <a>로그아웃</a>
+            <% } else { %>
+                로그인을 해주세요!
+                <a>로그인</a>
+            <% } %>
+        </div>
+
+    </header>
+    <main>
+        <section id="board" class="default-box">
+            <h2>board</h2>
+            <h2 class="right">{{ title }}</h2>
+            <div id="cards-wrapper">
+                <div class="cards-row">
+                    <div class="card"></div>
+                    <div class="card"></div>
+                </div>
+            </div>
+        </section>
+        <section id="users" class="default-box">
+            <h2>player</h2>
+        </section>
+    </main>
+    <section id="hands" class="default-box">
+        <h2>hands</h2>
+        <div class="card"></div>
+        <div class="card"></div>
+    </section>
+</body>
+<script>
+    const app = new Vue({
+        el: 'main',
+        data: {
+            title: null,
+        },
+        created() {
+            this.updateData();
+        },
+        methods: {
+            updateData() {
+                // get rooms
+                axios.get('/api/room', {
+                    params: {
+                        id: <%= id %>,
+                    }
+                }).then((res) => {
+                    this.roomList = res.data.roomList;
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }
+        },
+    });
+</script>
+</html>
