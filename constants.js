@@ -4,6 +4,7 @@ module.exports = {
 
     // data type
     BASIC: 'basic',
+    FOR_USER: 'for_user',
     FULL: 'full',
 
     // player type

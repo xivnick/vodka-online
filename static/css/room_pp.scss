@@ -5,6 +5,12 @@ $border-grey: #B0B0B0;
 
 * {
   box-sizing: border-box;
+  outline: none;
+}
+
+body{
+  font-family: Roboto;
+  font-style: normal;
 }
 
 h1, h2{
@@ -30,8 +36,6 @@ header{
     left: 20px;
     bottom: 5px;
 
-    font-family: Roboto;
-    font-style: normal;
     font-weight: normal;
     font-size: 15px;
     line-height: 1;
@@ -42,8 +46,6 @@ header{
     right: 20px;
     bottom: 5px;
 
-    font-family: Roboto;
-    font-style: normal;
     font-weight: normal;
     font-size: 12px;
     line-height: 1;
@@ -58,6 +60,28 @@ header{
   background: #FDFDFF;
   border: 1px solid #CCCCCC;
   box-sizing: border-box;
+
+  border-radius: 3px;
+  &.adjacent{
+    border: 1px dashed #CCCCCC;
+  }
+}
+
+button{
+  width: 140px;
+  height: 26px;
+
+  background: #FBFBFF;
+  border: 1px solid #CCCCCC;
+  box-sizing: border-box;
+  border-radius: 5px;
+
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 20px;
+}
+button:hover{
+  background: #E6E5FF;
 }
 
 .default-box{
@@ -69,29 +93,41 @@ header{
     left: 16px;
     top: 12px;
 
-    font-family: Roboto;
-    font-style: normal;
     font-weight: normal;
     font-size: 12px;
     line-height: 14px;
+
+    &.right{
+      left: auto;
+      right: 16px;
+    }
   }
 }
 
-main{
+#main-wrapper{
   display: flex;
   justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 #board{
   width: 600px;
-  padding: 50px 36px 30px 36px;
+  padding: 50px 36px 20px 36px;
+
+  #start-game{
+    position: absolute;
+
+    left: 230px;
+    top: 130px;
+  }
 
   #cards-wrapper{
-    width: 528px;
-    margin: auto;
+    width: 100%;
+    min-height: 212px;
 
     .cards-row{
       display: flex;
+      padding-bottom: 10px;
     }
   }
 
@@ -99,13 +135,39 @@ main{
 
 #users {
   width: 180px;
+
+  padding: 50px 20px 30px 20px;
+
+  .user-wrapper{
+
+    height: 15px;
+    margin-bottom: 12px;
+
+    .name{
+      float: left;
+
+      font-weight: bold;
+      font-size: 12px;
+      line-height: 14px;
+
+      color: #7E7E7E;
+    }
+    .score{
+      float: right;
+      font-weight: normal;
+      font-size: 12px;
+      line-height: 14px;
+    }
+  }
+
 }
 
 #hands{
-  padding: 40px 46px 18px 46px;
+  padding: 40px 32px 8px 46px;
 
   .card{
     float: left;
+    margin-bottom: 10px;
   }
 }
 #hands::after{

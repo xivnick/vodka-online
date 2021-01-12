@@ -2,6 +2,7 @@
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 
 const port = process.env.PORT || 3333;
 
@@ -11,6 +12,7 @@ const constants = require('./constants');
 const data = require('./data/data');
 const api = require('./routes/api')
 
+app.set('socketio', io);
 app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(express.static('static'));
@@ -27,7 +29,7 @@ app.get('/room/:id', (req, res) => {
     let room = data.roomList.getRoom(id);
 
     if(room.game.name === constants.PENGUIN_PARTY){
-        return res.render('room_pp.ejs', {id: id, username: '민재'});
+        return res.render('room_pp.ejs', {id: id});
     }
 
     return res.send(room);
@@ -35,6 +37,17 @@ app.get('/room/:id', (req, res) => {
 
 app.get('/test', (req, res) => {
     return res.send(data.roomList);
+});
+
+io.on('connection', (socket) => {
+    socket.emit('connection');
+    console.log(`[conn] client connected: ${socket.id}`);
+
+    socket.on('join', (name, id) => {
+        socket.name = name;
+        socket.join(id);
+        console.log(socket.name);
+    })
 });
 
 http.listen(port, () => {

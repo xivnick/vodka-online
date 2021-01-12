@@ -10,6 +10,10 @@ const COLORS = [
     constants.VIOLET,
 ];
 
+const CARDINALITY = {
+    2:18, 3: 12, 4: 9, 5: 7, 6: 6,
+};
+
 class PPCard {
     constructor(color) {
         this.color = color;
@@ -20,8 +24,8 @@ class PPPlayer {
     constructor(name, type) {
         this.name = name;
         this.type = type;
-        this.point = 0;
-        this.cards = [];
+        this.score = 0;
+        this.hands = [];
     }
 }
 
@@ -29,19 +33,40 @@ class PenguinParty {
     constructor() {
         this.name = 'penguin party';
 
-        this.deck = this.newDeck();
+        this.deck = null;
+        this.board = null;
 
         this.players = [];
+        this.playing = false;
+
+        this.refreshGame();
+    }
+
+    gameStart(){
+        if(this.players.length < 2){
+            return '두 명 이상의 플레이어가 필요합니다.';
+        }
+
+        this.playing = true;
+        for(let player of this.players){
+            player.point = 0;
+            player.hands = this.deck.splice(0, CARDINALITY[this.players.length]);
+        }
+        return null;
+    }
+
+    refreshGame(){
+        this.deck = this.newDeck();
 
         this.board = [
-            [null],
-            [null, null],
-            [null, null, null],
-            [null, null, null, null],
-            [null, null, null, null, null],
-            [null, null, null, null, null, null],
-            [null, null, null, null, null, null, null],
-            [null, null, null, null, null, null, null, null],
+            [{}],
+            [{}, {}],
+            [{}, {}, {}],
+            [{}, {}, {}, {}],
+            [{}, {}, {}, {}, {}],
+            [{}, {}, {}, {}, {}, {}],
+            [{}, {}, {}, {}, {}, {}, {}],
+            [{}, {}, {}, {adjacent: true}, {}, {}, {}, {}],
         ];
     }
 
@@ -65,11 +90,11 @@ class PenguinParty {
     }
 
     addPlayer(name){
-        if(this.players.length === 5){
-            return null;
+        if(this.players.length === 6){
+            return '플레이어가 너무 많습니다.(최대 6명)';
         }
 
-        this.players.append(new PPPlayer(name));
+        this.players.push(new PPPlayer(name));
     }
 }
 

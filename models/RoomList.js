@@ -22,7 +22,13 @@ class Room {
                 title: this.title,
             }
         }
-        return this;
+
+        return {
+            id: this.id,
+            title: this.title,
+            users: this.users,
+            game: this.game,
+        }
     }
 
     addUser(name) {

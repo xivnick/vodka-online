@@ -3,66 +3,193 @@
 <head>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/room_pp.css"/>
 </head>
 <body>
+<div id="app">
     <header>
         <h1>VODKA online</h1>
-        <div id="user-info">
-            <% if(username) { %>
-                안녕하세요, <%= username %> 님!
-                <a>로그아웃</a>
-            <% } else { %>
-                로그인을 해주세요!
-                <a>로그인</a>
-            <% } %>
+        <div id="user-info" v-if="username">
+            {{username}}님, 환영합니다! <a @click="logout()">로그아웃</a>
         </div>
-
     </header>
     <main>
-        <section id="board" class="default-box">
-            <h2>board</h2>
-            <h2 class="right">{{ title }}</h2>
-            <div id="cards-wrapper">
-                <div class="cards-row">
-                    <div class="card"></div>
-                    <div class="card"></div>
+        <section id="main-wrapper">
+            <section id="board" class="default-box">
+                <h2>board</h2>
+                <h2 class="right">{{ title }}</h2>
+
+                <button id="start-game" v-if="!game.playing" @click="startGame()">
+                    게임 시작하기
+                </button>
+
+                <div id="cards-wrapper"
+                     :style="`padding-left: ${countCard(game.board[7])%2?0:30}px`"
+                >
+                    <div class="cards-row"
+                         v-for="(cardRow, row) in game.board"
+                         :style="`padding-left: ${(7-row)*30}px; display: ${(row < 5 && countCard(cardRow) === 0)?'none':'flex'};`"
+                    >
+                        <template v-for="card in cardRow">
+                            <div class="card" v-if="card.color">{{card.color}}</div>
+                            <div class="card adjacent" v-else-if="card.adjacent"></div>
+                            <div class="card" style="visibility: hidden;" v-else></div>
+                        </template>
+                    </div>
                 </div>
-            </div>
+            </section>
+            <section id="users" class="default-box">
+                <h2>player</h2>
+                <div class="user-wrapper" v-for="player in game.players">
+                    <div class="name">{{player.name}}</div>
+                    <div class="score">{{player.score}}</div>
+                </div>
+                <button id="start-game" v-if="!game.playing" @click="joinGame()">
+                    게임 참가하기
+                </button>
+            </section>
         </section>
-        <section id="users" class="default-box">
-            <h2>player</h2>
+        <section id="hands" class="default-box">
+            <h2>hands</h2>
+            <div class="card" v-for="card in hands">{{card.color}}</div>
         </section>
     </main>
-    <section id="hands" class="default-box">
-        <h2>hands</h2>
-        <div class="card"></div>
-        <div class="card"></div>
-    </section>
+</div>
+
 </body>
 <script>
+    const id = parseInt('<%= id %>');
+
     const app = new Vue({
-        el: 'main',
+        el: '#app',
         data: {
+            username: null,
             title: null,
+            users: [],
+            game: null,
+            hands: [],
         },
         created() {
-            this.updateData();
+            const socket = io();
+
+            socket.on('connection', () => {
+
+                let name = getCookie('online-vodka-username');
+                while(name === null || name === ''){
+                    name = prompt('이름을 입력해주세요.');
+                }
+                this.username = name;
+                setCookie('online-vodka-username', name, 1);
+                socket.emit('join', name, id);
+
+                this.updateData();
+            });
+
+            socket.on('update', () => {
+                console.log('hello');
+                this.updateData();
+            });
         },
         methods: {
             updateData() {
                 // get rooms
                 axios.get('/api/room', {
                     params: {
-                        id: <%= id %>,
+                        id,
                     }
                 }).then((res) => {
-                    this.roomList = res.data.roomList;
+                    const room = res.data.room;
+
+                    this.title = room.title;
+                    this.users = room.users;
+                    this.game = room.game;
+
+                    this.trimCards();
                 }).catch((err) => {
                     console.log(err);
                 });
-            }
+            },
+            trimCards(){
+                let board = this.game.board;
+
+                for(let cardRow of board){
+                    if(this.countCard(board[7])%2){
+                        cardRow.splice(0,0,{});
+                    }
+                }
+
+                for(let r = 0; r < 8; r++){
+                    for(let c = 0; c < board[r].length; c++){
+                        if(board[r][c].color || board[r][c].adjacent) continue;
+
+                        let adjacent = false;
+                        if(c && board[r][c-1].color) adjacent = true;
+                        if(c < board[r].length-1 && board[r][c+1].color) adjacent = true;
+                        if(r < 7 && board[r+1][c].color) adjacent = true;
+                        if(r < 7 && board[r+1][c+1].color) adjacent = true;
+
+                        board[r][c].adjacent = adjacent;
+                    }
+                }
+
+                for(let player of this.game.players){
+                    if(player.name === this.username){
+                        this.hands = player.hands;
+                        this.hands.sort((a, b) => a.color > b.color ? 1 : a.color < b.color ? -1 : 0);
+                        break;
+                    }
+                }
+            },
+            countCard(cardList) {
+                let cnt = 0;
+                for(let card of cardList){
+                    if(card.color || card.adjacent) cnt++;
+                }
+                return cnt;
+            },
+            startGame() {
+                axios.post('/api/game/start', {
+                    id
+                }).then((res) => {
+                    if(res.data.error){
+                        alert(res.data.error);
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                });
+            },
+            joinGame() {
+                axios.post('/api/game/join', {
+                    id,
+                    username: this.username,
+                }).then((res) => {
+                    if(res.data.error){
+                        alert(res.data.error);
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                });
+            },
+            logout() {
+                deleteCookie('online-vodka-username');
+                location.reload();
+            },
         },
     });
+</script>
+<script>
+    const setCookie = (name, value, exp) => {
+        const date = new Date();
+        date.setTime(date.getTime() + exp*24*60*60*1000);
+        document.cookie = name + '=' + value + ';expires=' + date.toUTCString() + ';path=/';
+    };
+    const getCookie = (name) => {
+        const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+        return value?value[2]:null;
+    };
+    const deleteCookie = (name) => {
+        document.cookie = name + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';
+    }
 </script>
 </html>
