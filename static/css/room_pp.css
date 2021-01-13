@@ -92,7 +92,8 @@ button:hover {
 
 .default-box {
   position: relative;
-  border: #B0B0B0 1px solid; }
+  border: #B0B0B0 1px solid;
+  border-radius: 3px; }
   .default-box h2 {
     position: absolute;
     left: 16px;

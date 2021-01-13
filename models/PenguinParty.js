@@ -38,6 +38,8 @@ class PenguinParty {
 
         this.players = [];
         this.playing = false;
+        this.startPlayer = 0;
+        this.round = 0;
 
         this.refreshGame();
     }
@@ -48,12 +50,51 @@ class PenguinParty {
         }
 
         this.playing = true;
-        this.turn = tools.getRandomInt(0, this.players.length);
-        for(let player of this.players){
+        this.startPlayer = tools.getRandomInt(0, this.players.length);
+        this.round = 0;
+
+
+        for(let player of this.players) {
             player.point = 0;
+        }
+
+        this.startRound();
+        return null;
+    }
+
+    startRound(){
+        this.refreshGame();
+        this.turn = this.startPlayer;
+        for(let player of this.players){
             player.hands = this.deck.splice(0, CARDINALITY[this.players.length]);
         }
-        return null;
+
+        if(this.players.length === 5){
+            this.board[7][4] = this.deck.splice(0,1);
+        }
+    }
+
+    endRound(){
+        // 점수계산
+        for(let player of this.players){
+            if(player.hands.length === 0){
+                if(player.point <= -10) player.point += 10;
+                else if(player.point <= -6) player.point += 6;
+                else if(player.point === -5) player.point += 5;
+                else if(player.point <= -2) player.point += 2;
+                else player.point = 0;
+            }
+            else{
+                player.point -= player.hands.length;
+            }
+        }
+
+        this.round++;
+        if(this.round === this.players.length){
+            return constants.GAME_END;
+        }
+
+        return constants.ROUND_END;
     }
 
     refreshGame(){
@@ -69,17 +110,6 @@ class PenguinParty {
             [{}, {}, {}, {}, {}, {}, {}],
             [{}, {}, {}, {}, {adjacent: true}, {}, {}, {}],
         ];
-
-        // this.board = [
-        //     [{}],
-        //     [{}, {}],
-        //     [{}, {}, {}],
-        //     [{}, {}, {}, {}],
-        //     [{}, {}, {}, {}, {}],
-        //     [{}, {}, {}, {}, {}, {}],
-        //     [{}, {color: 'blue'}, {color: 'blue'}, {color: 'blue'}, {color: 'blue'}, {}, {}],
-        //     [{color: 'blue'}, {color: 'blue'}, {color: 'blue'}, {color: 'blue'}, {color: 'blue'}, {color: 'blue'}, {color: 'blue'}, {}],
-        // ];
     }
 
     newDeck(){
@@ -211,17 +241,63 @@ class PenguinParty {
             return '다른 플레이어의 차례예요.';
         }
 
-        this.turn++;
-        if(this.turn === this.players.length) this.turn = 0;
+        let series = 0;
+        while(true){
+            this.turn++;
+            if(this.turn === this.players.length) this.turn = 0;
+
+            let nextPlay = false;
+
+            const nextHands = this.players[this.turn].hands;
+
+            for(let card of nextHands){
+                for(let r = 0; r < 8 && !nextPlay; r++){
+                    for(let c = 0; c < this.board[r].length && !nextPlay; c++){
+                        if(this.validPlace(card.color, r, c)){
+                            nextPlay = true;
+                            break;
+                        }
+                    }
+                }
+                if(nextPlay) break;
+            }
+            if(nextPlay){
+                series = 0;
+                break;
+            }
+            series++;
+            if(series === this.players.length){
+                return this.endRound();
+            }
+        }
 
         return null;
+    }
+
+    validPlace(color, r, c){
+        // 이미 카드가 놓여있는 경우
+        if(c < this.board[r].length && this.board[r][c].color) return false;
+
+        // 시작점임
+        if(c < this.board[r].length && this.board[r][c].adjacent) return true;
+
+        if(r === 7){
+            if(c !== 0 && this.board[r][c-1].color || c < this.board[r].length - 1 && this.board[r][c+1].color){
+                return true;
+            }
+        }
+        else if(this.board[r+1][c].color && this.board[r+1][c+1].color){
+            if(this.board[r+1][c].color === color || this.board[r+1][c+1].color === color){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     playCard(username, color, r, c){
 
         let pi = this.getPlayerIdx(username);
-
-        console.log(pi, this.turn);
 
         if(pi !== this.turn){
             return '다른 플레이어의 차례예요.';
@@ -239,7 +315,9 @@ class PenguinParty {
             return '해당 카드를 낼 수 없습니다. 다시 확인해주세요.';
         }
 
-        // TODO: 카드 낼수있는지 체크하기
+        if(!this.validPlace(color, r, c)){
+            return '해당 카드를 낼 수 없습니다. 다시 확인해주세요.';
+        }
 
         // 카드 내기
         player.hands.splice(ci, 1);
@@ -263,9 +341,7 @@ class PenguinParty {
         }
         this.board[r][c] = {color: color};
 
-        this.turnOver();
-
-        return null;
+        return this.turnOver();
     }
 }
 

@@ -2,6 +2,10 @@ module.exports = {
     // games
     PENGUIN_PARTY: 'penguin party',
 
+    // game status
+    GAME_END: 'game end',
+    ROUND_END: 'round end',
+
     // data type
     BASIC: 'basic',
     FOR_USER: 'for_user',

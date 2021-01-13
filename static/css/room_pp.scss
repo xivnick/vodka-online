@@ -115,6 +115,7 @@ button:hover{
 .default-box{
   position: relative;
   border: $border-grey 1px solid;
+  border-radius: 3px;
 
   h2{
     position: absolute;

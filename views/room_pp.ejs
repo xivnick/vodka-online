@@ -105,6 +105,14 @@
                 console.log('update');
                 this.updateData();
             });
+            socket.on('round end', () => {
+                console.log('update');
+                console.log('round end');
+            });
+            socket.on('game end', () => {
+                console.log('update');
+                console.log('game end');
+            });
         },
         methods: {
             updateData() {

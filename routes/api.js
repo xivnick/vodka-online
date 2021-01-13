@@ -92,6 +92,19 @@ router.post('/game/leave', (req, res) => {
     return res.send({});
 });
 
+router.post('/game/newRound', (req, res) => {
+
+    const io = req.app.get('socketio');
+
+    let id = parseInt(req.body.id);
+    let game = data.roomList.getRoom(id).game;
+
+    game.startRound();
+
+    io.to(id).emit("update");
+    return res.send({});
+});
+
 router.post('/game/reset', (req, res) => {
 
     const io = req.app.get('socketio');
@@ -116,6 +129,11 @@ router.post('/game/pp/play', (req, res) => {
     let position = req.body.position;
 
     let error = game.playCard(username, color, position.r, position.c);
+
+    if(error === constants.ROUND_END || error === constants.GAME_END){
+        io.to(id).emit(error);
+        return res.send({});
+    }
 
     if(error) return res.send({error});
 
