@@ -53,6 +53,8 @@ header {
     .card.adjacent.activate {
       box-shadow: none;
       background: #E6E5FF; }
+    .card.adjacent.semi-activate {
+      background: #FFF6EB; }
   .card:last-child {
     margin-right: 0; }
   .card.activate {
@@ -138,8 +140,16 @@ button:hover {
       float: left;
       font-weight: bold;
       font-size: 12px;
-      line-height: 14px;
+      line-height: 17px;
       color: #7E7E7E; }
+    #users .user-wrapper .turn {
+      float: left;
+      margin-left: 5px;
+      margin-top: 1px;
+      height: 13px;
+      width: 5px;
+      background: #d35400;
+      border-radius: 1px; }
     #users .user-wrapper .score {
       float: right;
       font-weight: normal;
@@ -150,6 +160,10 @@ button:hover {
   padding: 40px 32px 8px 46px;
   min-height: 100px;
   margin-bottom: 10px; }
+  #hands #pass-button {
+    color: #666;
+    font-size: 12px;
+    text-decoration: underline; }
   #hands .card {
     float: left;
     margin-bottom: 10px; }
@@ -162,7 +176,6 @@ button:hover {
 #reset-game {
   float: right;
   color: #999;
-  font-size: 12px;
   text-decoration: underline; }
 
 /*# sourceMappingURL=room_pp.css.map */

@@ -123,4 +123,19 @@ router.post('/game/pp/play', (req, res) => {
     return res.send({});
 });
 
+router.post('/game/pp/pass', (req, res) => {
+    const io = req.app.get('socketio');
+
+    let id = parseInt(req.body.id);
+    let username = req.body.username;
+    let game = data.roomList.getRoom(id).game;
+
+    let error = game.turnOver(username);
+
+    if(error) return res.send({error});
+
+    io.to(id).emit("update");
+    return res.send({});
+});
+
 module.exports = router;

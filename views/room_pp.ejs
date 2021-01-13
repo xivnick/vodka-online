@@ -35,7 +35,7 @@
                         <template v-for="(card, c) in cardRow">
                             <div class="card" :class="card.color" v-if="card.color"></div>
                             <div class="card adjacent"
-                                 :class="card.activate?'activate':''"
+                                 :class="card.activate?(myTurn?'activate':'semi-activate'):''"
                                  v-else-if="card.adjacent"
                                  @click="playCard(row, c)"
                             ></div>
@@ -48,6 +48,7 @@
                 <h2>player</h2>
                 <div class="user-wrapper" v-for="(player, idx) in game.players">
                     <a class="name" @click="replacePlayer(idx)">{{player.name}}</a>
+                    <div v-if="idx === game.turn" class="turn"></div>
                     <div class="score">{{player.score}}</div>
                 </div>
                 <button id="start-game" v-if="!game.playing" @click="joinGame()">
@@ -61,6 +62,7 @@
         </section>
         <section id="hands" class="default-box">
             <h2>hands</h2>
+            <h2 v-if="myTurn" id="pass-button" @click="passTurn()" class="right">패스하기</h2>
             <div class="card" :class="`${card.color} ${card.activate?'activate':''}`" v-for="(card, idx) in hands" @click="activate(idx)"></div>
         </section>
     </main>
@@ -81,6 +83,7 @@
             hands: [],
             inGame: false,
             selectedColor: null,
+            myTurn: false,
         },
         created() {
             const socket = io();
@@ -155,6 +158,8 @@
                         break;
                     }
                 }
+
+                this.myTurn = this.game.players[this.game.turn].name === this.username;
             },
             countCard(cardList) {
                 let cnt = 0;
@@ -288,6 +293,8 @@
                 }
             },
             playCard(r, c){
+                if(!this.myTurn) return;
+
                 let board = this.game.board;
                 if(!board[r][c].activate) return;
 
@@ -296,6 +303,18 @@
                     username: this.username,
                     position: {r, c},
                     color: this.selectedColor,
+                }).then((res) => {
+                    if(res.data.error){
+                        alert(res.data.error);
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                });
+            },
+            passTurn(){
+                axios.post('/api/game/pp/pass', {
+                    id,
+                    username: this.username,
                 }).then((res) => {
                     if(res.data.error){
                         alert(res.data.error);

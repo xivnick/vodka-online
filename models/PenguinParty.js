@@ -48,6 +48,7 @@ class PenguinParty {
         }
 
         this.playing = true;
+        this.turn = tools.getRandomInt(0, this.players.length);
         for(let player of this.players){
             player.point = 0;
             player.hands = this.deck.splice(0, CARDINALITY[this.players.length]);
@@ -186,10 +187,10 @@ class PenguinParty {
         return null;
     }
 
-    getPlayer(username){
-        for(let player of this.players){
-            if(player.name === username){
-                return player;
+    getPlayerIdx(username){
+        for(let idx = 0; idx < this.players.length; idx++){
+            if(this.players[idx].name === username){
+                return idx;
             }
         }
         return null;
@@ -205,9 +206,28 @@ class PenguinParty {
         return count;
     }
 
+    turnOver(username){
+        if(username && this.players[this.turn].name !== username){
+            return '다른 플레이어의 차례예요.';
+        }
+
+        this.turn++;
+        if(this.turn === this.players.length) this.turn = 0;
+
+        return null;
+    }
+
     playCard(username, color, r, c){
 
-        let player = this.getPlayer(username);
+        let pi = this.getPlayerIdx(username);
+
+        console.log(pi, this.turn);
+
+        if(pi !== this.turn){
+            return '다른 플레이어의 차례예요.';
+        }
+
+        let player = this.players[pi];
 
         let ci = 0;
         while(ci < player.hands.length){
@@ -216,7 +236,7 @@ class PenguinParty {
         }
 
         if(ci === player.hands.length){
-            return '해당 카드를 낼 수 없습니다. 다시 확인해주세요.'
+            return '해당 카드를 낼 수 없습니다. 다시 확인해주세요.';
         }
 
         // TODO: 카드 낼수있는지 체크하기
@@ -241,9 +261,9 @@ class PenguinParty {
             }
             c++;
         }
-
-
         this.board[r][c] = {color: color};
+
+        this.turnOver();
 
         return null;
     }
