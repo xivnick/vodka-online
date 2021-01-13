@@ -46,6 +46,7 @@ io.on('connection', (socket) => {
     socket.on('join', (name, id) => {
         socket.name = name;
         socket.join(id);
+        data.roomList.getRoom(id).addUser(name);
         console.log(socket.name);
     })
 });

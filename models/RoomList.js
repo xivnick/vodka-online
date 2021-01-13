@@ -10,6 +10,12 @@ class Room {
         this.users = [];
         this.game = null;
 
+        this.assignGame(game);
+    }
+
+    assignGame(game){
+        if(this.game) delete this.game;
+
         if(game === constants.PENGUIN_PARTY){
             this.game = new PenguinParty();
         }
@@ -32,7 +38,28 @@ class Room {
     }
 
     addUser(name) {
-        this.users.push(name, constants.HUMAN);
+        console.log(`add user ${name} to ${this.id}`);
+        if(!this.users.includes(name)) this.users.push(name);
+    }
+
+    deleteUser(name) {
+        let deleted = false;
+
+        for(let i = 0; i < this.users.length; i++){
+            if(this.users[i] === name){
+                this.users.splice(i, 1);
+                deleted = true;
+                break;
+            }
+        }
+
+        if(!deleted){
+            return '방에 존재하지 않는 유저입니다.'
+        }
+        else{
+            this.game.deletePlayer(name);
+        }
+        return null;
     }
 }
 

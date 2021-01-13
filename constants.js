@@ -10,11 +10,12 @@ module.exports = {
     // player type
     HUMAN: 'human',
     BOT: 'bot',
+    EMPTY: 'empty',
 
     // color
-    RED: 'red',
+    PINK: 'pink',
     BLUE: 'blue',
     GREEN: 'green',
     YELLOW: 'yellow',
-    VIOLET: 'violet',
+    PURPLE: 'purple',
 };

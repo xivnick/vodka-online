@@ -20,9 +20,10 @@
                 <h2>board</h2>
                 <h2 class="right">{{ title }}</h2>
 
-                <button id="start-game" v-if="!game.playing" @click="startGame()">
+                <button id="start-game" v-if="!game.playing && inGame" @click="startGame()">
                     게임 시작하기
                 </button>
+                <div id="waiting-game" v-else-if="!game.playing">게임을 기다리는 중..</div>
 
                 <div id="cards-wrapper"
                      :style="`padding-left: ${countCard(game.board[7])%2?0:30}px`"
@@ -31,9 +32,13 @@
                          v-for="(cardRow, row) in game.board"
                          :style="`padding-left: ${(7-row)*30}px; display: ${(row < 5 && countCard(cardRow) === 0)?'none':'flex'};`"
                     >
-                        <template v-for="card in cardRow">
-                            <div class="card" v-if="card.color">{{card.color}}</div>
-                            <div class="card adjacent" v-else-if="card.adjacent"></div>
+                        <template v-for="(card, c) in cardRow">
+                            <div class="card" :class="card.color" v-if="card.color"></div>
+                            <div class="card adjacent"
+                                 :class="card.activate?'activate':''"
+                                 v-else-if="card.adjacent"
+                                 @click="playCard(row, c)"
+                            ></div>
                             <div class="card" style="visibility: hidden;" v-else></div>
                         </template>
                     </div>
@@ -41,20 +46,25 @@
             </section>
             <section id="users" class="default-box">
                 <h2>player</h2>
-                <div class="user-wrapper" v-for="player in game.players">
-                    <div class="name">{{player.name}}</div>
+                <div class="user-wrapper" v-for="(player, idx) in game.players">
+                    <a class="name" @click="replacePlayer(idx)">{{player.name}}</a>
                     <div class="score">{{player.score}}</div>
                 </div>
                 <button id="start-game" v-if="!game.playing" @click="joinGame()">
-                    게임 참가하기
+                    <template v-if="inGame">봇 추가하기</template>
+                    <template v-else>게임 참가하기</template>
+                </button>
+                <button id="start-game" v-if="inGame" @click="leaveGame()">
+                    게임 떠나기
                 </button>
             </section>
         </section>
         <section id="hands" class="default-box">
             <h2>hands</h2>
-            <div class="card" v-for="card in hands">{{card.color}}</div>
+            <div class="card" :class="`${card.color} ${card.activate?'activate':''}`" v-for="(card, idx) in hands" @click="activate(idx)"></div>
         </section>
     </main>
+    <a id="reset-game" @click="resetGame()">게임 하드 리셋</a>
 </div>
 
 </body>
@@ -69,6 +79,8 @@
             users: [],
             game: null,
             hands: [],
+            inGame: false,
+            selectedColor: null,
         },
         created() {
             const socket = io();
@@ -87,7 +99,7 @@
             });
 
             socket.on('update', () => {
-                console.log('hello');
+                console.log('update');
                 this.updateData();
             });
         },
@@ -105,17 +117,17 @@
                     this.users = room.users;
                     this.game = room.game;
 
-                    this.trimCards();
+                    this.updateProcess();
                 }).catch((err) => {
                     console.log(err);
                 });
             },
-            trimCards(){
+            updateProcess(){
                 let board = this.game.board;
 
                 for(let cardRow of board){
                     if(this.countCard(board[7])%2){
-                        cardRow.splice(0,0,{});
+                        cardRow.push({});
                     }
                 }
 
@@ -133,8 +145,11 @@
                     }
                 }
 
+                this.hands = [];
+                this.inGame = false;
                 for(let player of this.game.players){
                     if(player.name === this.username){
+                        this.inGame = true;
                         this.hands = player.hands;
                         this.hands.sort((a, b) => a.color > b.color ? 1 : a.color < b.color ? -1 : 0);
                         break;
@@ -162,6 +177,18 @@
             joinGame() {
                 axios.post('/api/game/join', {
                     id,
+                    username: this.inGame ? '$bot' : this.username,
+                }).then((res) => {
+                    if(res.data.error){
+                        alert(res.data.error);
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                });
+            },
+            leaveGame() {
+                axios.post('/api/game/leave', {
+                    id,
                     username: this.username,
                 }).then((res) => {
                     if(res.data.error){
@@ -171,9 +198,111 @@
                     console.log(err);
                 });
             },
+            replacePlayer(idx) {
+                if(this.game.players[idx].type === 'human') return;
+
+                axios.post('/api/game/join', {
+                    id,
+                    username: this.inGame ? '$bot' : this.username,
+                    idx,
+                }).then((res) => {
+                    if(res.data.error){
+                        alert(res.data.error);
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                });
+            },
             logout() {
+                // 쿠키 삭제하기
                 deleteCookie('online-vodka-username');
+
+                // 로그아웃 요청 보내기
+                axios.post('/api/account/logout', {
+                    id,
+                    username: this.username,
+                }).then((res) => {
+                    if(res.data.error){
+                        alert(res.data.error);
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                });
+
+                // 새로고침
                 location.reload();
+            },
+            resetGame() {
+                if(confirm('게임을 정말 초기화하시겠습니까?')){
+                    axios.post('/api/game/reset', {
+                        id,
+                        username: this.username,
+                    }).then((res) => {
+                        if(res.data.error){
+                            alert(res.data.error);
+                        }
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+                }
+            },
+            activate(idx) {
+                let board = this.game.board;
+
+                if(this.hands[idx].activate){
+                    Vue.set(this.hands[idx], 'activate', false);
+                    for(let row of board){
+                        for(let card of row){
+                            card.activate = false;
+                        }
+                    }
+                    this.selectedColor = null;
+                    return;
+                }
+
+                this.selectedColor = this.hands[idx].color;
+
+                for(let card of this.hands){
+                    Vue.set(card, 'activate', false);
+                    card.activate = false;
+                }
+                Vue.set(this.hands[idx], 'activate', true);
+
+                for(let r = 0; r < 8; r++){
+                    for(let c = 0; c < board[r].length; c++){
+                        board[r][c].activate = false;
+                        if(board[r][c].adjacent){
+                            if(r === 7){
+                                board[r][c].activate = true;
+                                continue;
+                            }
+
+                            const c1 = board[r+1][c].color;
+                            const c2 = board[r+1][c+1].color;
+
+                            if(c1 && c2 && (c1 === this.selectedColor || c2 === this.selectedColor)){
+                                board[r][c].activate = true;
+                            }
+                        }
+                    }
+                }
+            },
+            playCard(r, c){
+                let board = this.game.board;
+                if(!board[r][c].activate) return;
+
+                axios.post('/api/game/pp/play', {
+                    id,
+                    username: this.username,
+                    position: {r, c},
+                    color: this.selectedColor,
+                }).then((res) => {
+                    if(res.data.error){
+                        alert(res.data.error);
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                });
             },
         },
     });
@@ -189,7 +318,7 @@
         return value?value[2]:null;
     };
     const deleteCookie = (name) => {
-        document.cookie = name + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';
+        document.cookie = name + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;path=/';
     }
 </script>
 </html>

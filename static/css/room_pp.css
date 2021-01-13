@@ -4,8 +4,10 @@
   outline: none; }
 
 body {
-  font-family: Roboto;
-  font-style: normal; }
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-size: 12px;
+  padding-bottom: 40px; }
 
 h1, h2 {
   margin: 0; }
@@ -32,8 +34,11 @@ header {
     right: 20px;
     bottom: 5px;
     font-weight: normal;
-    font-size: 12px;
     line-height: 1; }
+    header #user-info a {
+      margin-left: 5px;
+      font-weight: bold;
+      color: #d35400; }
 
 .card {
   width: 48px;
@@ -45,10 +50,33 @@ header {
   border-radius: 3px; }
   .card.adjacent {
     border: 1px dashed #CCCCCC; }
+    .card.adjacent.activate {
+      box-shadow: none;
+      background: #E6E5FF; }
+  .card:last-child {
+    margin-right: 0; }
+  .card.activate {
+    box-shadow: 0 0 1px 1px #d35400; }
+  .card.blue {
+    background-image: url("/image/pp/tilt_blue.png");
+    background-size: cover; }
+  .card.pink {
+    background-image: url("/image/pp/tilt_pink.png");
+    background-size: cover; }
+  .card.yellow {
+    background-image: url("/image/pp/tilt_yellow.png");
+    background-size: cover; }
+  .card.green {
+    background-image: url("/image/pp/tilt_green.png");
+    background-size: cover; }
+  .card.purple {
+    background-image: url("/image/pp/tilt_purple.png");
+    background-size: cover; }
 
 button {
   width: 140px;
   height: 26px;
+  margin-bottom: 10px;
   background: #FBFBFF;
   border: 1px solid #CCCCCC;
   box-sizing: border-box;
@@ -86,6 +114,13 @@ button:hover {
     position: absolute;
     left: 230px;
     top: 130px; }
+  #board #waiting-game {
+    position: absolute;
+    left: 0;
+    top: 130px;
+    width: 100%;
+    text-align: center;
+    line-height: 26px; }
   #board #cards-wrapper {
     width: 100%;
     min-height: 212px; }
@@ -112,7 +147,9 @@ button:hover {
       line-height: 14px; }
 
 #hands {
-  padding: 40px 32px 8px 46px; }
+  padding: 40px 32px 8px 46px;
+  min-height: 100px;
+  margin-bottom: 10px; }
   #hands .card {
     float: left;
     margin-bottom: 10px; }
@@ -121,5 +158,11 @@ button:hover {
   content: '';
   display: table;
   clear: both; }
+
+#reset-game {
+  float: right;
+  color: #999;
+  font-size: 12px;
+  text-decoration: underline; }
 
 /*# sourceMappingURL=room_pp.css.map */

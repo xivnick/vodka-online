@@ -9,8 +9,10 @@ $border-grey: #B0B0B0;
 }
 
 body{
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   font-style: normal;
+  font-size: 12px;
+  padding-bottom: 40px;
 }
 
 h1, h2{
@@ -47,8 +49,13 @@ header{
     bottom: 5px;
 
     font-weight: normal;
-    font-size: 12px;
     line-height: 1;
+
+    a{
+      margin-left: 5px;
+      font-weight: bold;
+      color: #d35400;
+    }
   }
 }
 
@@ -64,12 +71,30 @@ header{
   border-radius: 3px;
   &.adjacent{
     border: 1px dashed #CCCCCC;
+    &.activate{
+      box-shadow: none;
+      background: #E6E5FF;
+    }
   }
+  &:last-child{
+    margin-right: 0;
+  }
+  &.activate{
+    box-shadow: 0 0 1px 1px #d35400;
+  }
+
+  &.blue{ background-image: url("/image/pp/tilt_blue.png"); background-size: cover; }
+  &.pink{ background-image: url("/image/pp/tilt_pink.png"); background-size: cover; }
+  &.yellow{ background-image: url("/image/pp/tilt_yellow.png"); background-size: cover; }
+  &.green{ background-image: url("/image/pp/tilt_green.png"); background-size: cover; }
+  &.purple{ background-image: url("/image/pp/tilt_purple.png"); background-size: cover; }
 }
 
 button{
   width: 140px;
   height: 26px;
+
+  margin-bottom: 10px;
 
   background: #FBFBFF;
   border: 1px solid #CCCCCC;
@@ -120,6 +145,14 @@ button:hover{
     left: 230px;
     top: 130px;
   }
+  #waiting-game{
+    position: absolute;
+    left: 0;
+    top: 130px;
+    width: 100%;
+    text-align: center;
+    line-height: 26px;
+  }
 
   #cards-wrapper{
     width: 100%;
@@ -164,6 +197,8 @@ button:hover{
 
 #hands{
   padding: 40px 32px 8px 46px;
+  min-height: 100px;
+  margin-bottom: 10px;
 
   .card{
     float: left;
@@ -174,4 +209,11 @@ button:hover{
   content: '';
   display: table;
   clear: both;
+}
+
+#reset-game{
+  float: right;
+  color: #999;
+  font-size: 12px;
+  text-decoration: underline;
 }
