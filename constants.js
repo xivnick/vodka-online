@@ -5,6 +5,7 @@ module.exports = {
     // game status
     GAME_END: 'game end',
     ROUND_END: 'round end',
+    ROUND_START: 'round start',
 
     // data type
     BASIC: 'basic',

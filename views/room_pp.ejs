@@ -66,7 +66,8 @@
             <div class="card" :class="`${card.color} ${card.activate?'activate':''}`" v-for="(card, idx) in hands" @click="activate(idx)"></div>
         </section>
     </main>
-    <a id="reset-game" @click="resetGame()">게임 하드 리셋</a>
+    <a v-if="waitingRound" id="start-round" @click="startRound()">새 라운드 시작하기</a>
+    <a v-else id="reset-game" @click="resetGame()">게임 하드 리셋</a>
 </div>
 
 </body>
@@ -84,6 +85,7 @@
             inGame: false,
             selectedColor: null,
             myTurn: false,
+            waitingRound: false,
         },
         created() {
             const socket = io();
@@ -105,12 +107,20 @@
                 console.log('update');
                 this.updateData();
             });
+            socket.on('round start', () => {
+                this.updateData();
+                this.waitingRound = false;
+                console.log('round start');
+            })
             socket.on('round end', () => {
-                console.log('update');
+                this.updateData();
+                this.waitingRound = true;
+                alert('라운드가 끝났어요. 준비되면 다음 라운드를 시작해 주세요.');
                 console.log('round end');
             });
             socket.on('game end', () => {
-                console.log('update');
+                this.updateData();
+                alert('게임 끝났어요. 다시 하려면 게임을 리셋해 주세요.');
                 console.log('game end');
             });
         },
@@ -249,7 +259,19 @@
                 if(confirm('게임을 정말 초기화하시겠습니까?')){
                     axios.post('/api/game/reset', {
                         id,
-                        username: this.username,
+                    }).then((res) => {
+                        if(res.data.error){
+                            alert(res.data.error);
+                        }
+                    }).catch((err) => {
+                        console.log(err);
+                    });
+                }
+            },
+            startRound() {
+                if(confirm('다음 라운드를 시작하시겠습니까?')){
+                    axios.post('/api/game/newRound', {
+                        id,
                     }).then((res) => {
                         if(res.data.error){
                             alert(res.data.error);

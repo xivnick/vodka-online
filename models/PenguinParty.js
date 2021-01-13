@@ -55,7 +55,7 @@ class PenguinParty {
 
 
         for(let player of this.players) {
-            player.point = 0;
+            player.score = 0;
         }
 
         this.startRound();
@@ -64,7 +64,7 @@ class PenguinParty {
 
     startRound(){
         this.refreshGame();
-        this.turn = this.startPlayer;
+        this.turn = (this.startPlayer + this.round) % this.players.length;
         for(let player of this.players){
             player.hands = this.deck.splice(0, CARDINALITY[this.players.length]);
         }
@@ -78,14 +78,14 @@ class PenguinParty {
         // 점수계산
         for(let player of this.players){
             if(player.hands.length === 0){
-                if(player.point <= -10) player.point += 10;
-                else if(player.point <= -6) player.point += 6;
-                else if(player.point === -5) player.point += 5;
-                else if(player.point <= -2) player.point += 2;
-                else player.point = 0;
+                if(player.score <= -10) player.score += 10;
+                else if(player.score <= -6) player.score += 6;
+                else if(player.score === -5) player.score += 5;
+                else if(player.score <= -2) player.score += 2;
+                else player.score = 0;
             }
             else{
-                player.point -= player.hands.length;
+                player.score -= player.hands.length;
             }
         }
 

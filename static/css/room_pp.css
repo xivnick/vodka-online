@@ -179,4 +179,9 @@ button:hover {
   color: #999;
   text-decoration: underline; }
 
+#start-round {
+  float: right;
+  color: #666;
+  text-decoration: underline; }
+
 /*# sourceMappingURL=room_pp.css.map */

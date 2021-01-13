@@ -101,7 +101,7 @@ router.post('/game/newRound', (req, res) => {
 
     game.startRound();
 
-    io.to(id).emit("update");
+    io.to(id).emit(constants.ROUND_START);
     return res.send({});
 });
 
