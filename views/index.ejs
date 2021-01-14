@@ -8,9 +8,10 @@
     <main>
         <a v-for="room in roomList"
            :href="'/room/'+room.id"
+           style="display: block;"
         >
             {{ room.title }}
-        </a><br>
+        </a>
     </main>
 </body>
 <script>
