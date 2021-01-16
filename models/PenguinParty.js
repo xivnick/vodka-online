@@ -26,6 +26,7 @@ class PPPlayer {
         this.type = type;
         this.score = 0;
         this.hands = [];
+        this.die = false;
     }
 }
 
@@ -78,7 +79,7 @@ class PenguinParty {
         }
 
         if(this.players.length === 5){
-            this.board[7][4] = this.deck.splice(0,1);
+            this.board[7][4] = this.deck.splice(0,1)[0];
         }
     }
 
@@ -119,6 +120,10 @@ class PenguinParty {
             [{}, {}, {}, {}, {}, {}, {}],
             [{}, {}, {}, {}, {adjacent: true}, {}, {}, {}],
         ];
+
+        for(let player of this.players){
+            player.die = false;
+        }
 
         this.waitingRound = false;
     }
