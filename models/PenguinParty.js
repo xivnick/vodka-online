@@ -41,6 +41,8 @@ class PenguinParty {
         this.startPlayer = 0;
         this.round = 0;
 
+        this.waitingRound = false;
+
         this.refreshGame();
     }
 
@@ -58,11 +60,17 @@ class PenguinParty {
             player.score = 0;
         }
 
+        this.waitingRound = true;
+
         this.startRound();
         return null;
     }
 
     startRound(){
+        if(!this.waitingRound){
+            return '이미 라운드가 시작되었습니다.';
+        }
+
         this.refreshGame();
         this.turn = (this.startPlayer + this.round) % this.players.length;
         for(let player of this.players){
@@ -94,6 +102,7 @@ class PenguinParty {
             return constants.GAME_END;
         }
 
+        this.waitingRound = true;
         return constants.ROUND_END;
     }
 
@@ -110,6 +119,8 @@ class PenguinParty {
             [{}, {}, {}, {}, {}, {}, {}],
             [{}, {}, {}, {}, {adjacent: true}, {}, {}, {}],
         ];
+
+        this.waitingRound = false;
     }
 
     newDeck(){

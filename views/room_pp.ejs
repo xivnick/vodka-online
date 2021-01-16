@@ -66,7 +66,7 @@
             <div class="card" :class="`${card.color} ${card.activate?'activate':''}`" v-for="(card, idx) in hands" @click="activate(idx)"></div>
         </section>
     </main>
-    <a v-if="waitingRound" id="start-round" @click="startRound()">새 라운드 시작하기</a>
+    <a v-if="game.waitingRound" id="start-round" @click="startRound()">새 라운드 시작하기</a>
     <a v-else id="reset-game" @click="resetGame()">게임 하드 리셋</a>
 </div>
 
@@ -109,41 +109,39 @@
             });
             socket.on('round start', () => {
                 this.updateData();
-                this.waitingRound = false;
                 console.log('round start');
             })
-            socket.on('round end', () => {
-                this.updateData();
-                this.waitingRound = true;
+            socket.on('round end', async () => {
+                await this.updateData();
                 alert('라운드가 끝났어요. 준비되면 다음 라운드를 시작해 주세요.');
                 console.log('round end');
             });
-            socket.on('game end', () => {
-                this.updateData();
+            socket.on('game end', async () => {
+                await this.updateData();
                 alert('게임 끝났어요. 다시 하려면 게임을 리셋해 주세요.');
                 console.log('game end');
             });
         },
         methods: {
-            updateData() {
+            async updateData() {
                 // get rooms
-                axios.get('/api/room', {
+                await axios.get('/api/room', {
                     params: {
                         id,
                     }
-                }).then((res) => {
+                }).then(async (res) => {
                     const room = res.data.room;
 
                     this.title = room.title;
                     this.users = room.users;
                     this.game = room.game;
 
-                    this.updateProcess();
+                    await this.updateProcess();
                 }).catch((err) => {
                     console.log(err);
                 });
             },
-            updateProcess(){
+            async updateProcess(){
                 let board = this.game.board;
 
                 for(let cardRow of board){

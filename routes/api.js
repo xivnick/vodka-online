@@ -99,7 +99,9 @@ router.post('/game/newRound', (req, res) => {
     let id = parseInt(req.body.id);
     let game = data.roomList.getRoom(id).game;
 
-    game.startRound();
+    let error = game.startRound();
+
+    if(error) return res.send({error});
 
     io.to(id).emit(constants.ROUND_START);
     return res.send({});
