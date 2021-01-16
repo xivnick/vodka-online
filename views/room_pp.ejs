@@ -60,7 +60,7 @@
                 </button>
             </section>
         </section>
-        <section id="hands" class="default-box">
+        <section id="hands" class="default-box" :class="myTurn?'activate':''">
             <h2>hands</h2>
             <h2 v-if="myTurn" id="pass-button" @click="passTurn()" class="right">패스하기</h2>
             <div class="card" :class="`${card.color} ${card.activate?'activate':''}`" v-for="(card, idx) in hands" @click="activate(idx)"></div>
