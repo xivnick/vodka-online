@@ -5,6 +5,14 @@ const router = express.Router();
 const data = require('../data/data');
 const constants = require('../constants');
 
+const COLORS = [
+    constants.PINK,
+    constants.BLUE,
+    constants.GREEN,
+    constants.YELLOW,
+    constants.PURPLE,
+];
+
 router.post('/account/logout', (req, res) => {
 
     const io = req.app.get('socketio');
@@ -34,6 +42,38 @@ router.get('/room', (req, res) => {
         room: room,
     });
 });
+
+router.get('/game', (req, res) => {
+    let id = parseInt(req.query.id);
+    let game = data.roomList.getRoom(id).game;
+
+    return res.send({
+        game: game,
+    });
+})
+
+router.get('/game/validPlaces', (req, res) => {
+    let id = parseInt(req.query.id);
+
+    let game = data.roomList.getRoom(id).game;
+
+    let validPlaces = {};
+
+    for(let color of COLORS){
+        validPlaces[color] = [];
+        for(let r = 0; r < 8; r++){
+            for(let c = 0; c < game.board[r].length; c++){
+                if(game.validPlace(color, r, c)){
+                    validPlaces[color].push({r, c});
+                }
+            }
+        }
+    }
+
+    return res.send({
+        validPlaces,
+    })
+})
 
 router.post('/game/start', (req, res) => {
 

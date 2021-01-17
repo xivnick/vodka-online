@@ -202,7 +202,7 @@
             joinGame() {
                 axios.post('/api/game/join', {
                     id,
-                    username: this.me ? '$bot' : this.username,
+                    username: this.inGame ? '$bot' : this.username,
                 }).then((res) => {
                     if(res.data.error){
                         alert(res.data.error);
@@ -228,7 +228,7 @@
 
                 axios.post('/api/game/join', {
                     id,
-                    username: this.me ? '$bot' : this.username,
+                    username: this.inGame ? '$bot' : this.username,
                     idx,
                 }).then((res) => {
                     if(res.data.error){

@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 
 const constants = require('./constants');
 const data = require('./data/data');
-const api = require('./routes/api')
+const api = require('./routes/api');
 
 app.set('socketio', io);
 app.set('view engine', 'ejs');

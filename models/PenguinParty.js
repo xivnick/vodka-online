@@ -2,6 +2,8 @@
 const constants = require('../constants');
 const tools = require('../tools');
 
+const AI = require('../AI/PenguinPartyAI');
+
 const COLORS = [
     constants.PINK,
     constants.BLUE,
@@ -31,7 +33,8 @@ class PPPlayer {
 }
 
 class PenguinParty {
-    constructor() {
+    constructor(id) {
+        this.id = id;
         this.name = 'penguin party';
 
         this.deck = null;
@@ -56,9 +59,13 @@ class PenguinParty {
         this.startPlayer = tools.getRandomInt(0, this.players.length);
         this.round = 0;
 
-
-        for(let player of this.players) {
+        for(let i = 0; i < this.players.length; i++){
+            let player = this.players[i];
             player.score = 0;
+
+            if(player.type === constants.BOT){
+                player.ai = new AI(this.id, i);
+            }
         }
 
         this.waitingRound = true;
@@ -80,6 +87,18 @@ class PenguinParty {
 
         if(this.players.length === 5){
             this.board[7][4] = this.deck.splice(0,1)[0];
+        }
+
+        this.checkBot();
+    }
+
+    checkBot(){
+        // 플레이어가 봇이면
+        if(this.players[this.turn].type === constants.BOT){
+            // 1초 뒤에 봇 플레이 호출
+            setTimeout(async () => {
+                await this.players[this.turn].ai.play();
+            }, 1000);
         }
     }
 
@@ -223,6 +242,10 @@ class PenguinParty {
             else{
                 this.players[idx].name = `bot ${idx+1}`;
                 this.players[idx].type = constants.BOT;
+
+                this.players[idx].ai = new AI(this.id, idx);
+
+                if(this.turn === idx) this.checkBot();
             }
         }
         else{
@@ -296,6 +319,8 @@ class PenguinParty {
                 return this.endRound();
             }
         }
+
+        this.checkBot();
 
         return null;
     }

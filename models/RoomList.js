@@ -17,7 +17,7 @@ class Room {
         if(this.game) delete this.game;
 
         if(game === constants.PENGUIN_PARTY){
-            this.game = new PenguinParty();
+            this.game = new PenguinParty(this.id);
         }
     }
 
