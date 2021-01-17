@@ -61,6 +61,7 @@
             </section>
         </section>
         <section id="hands" class="default-box" :class="myTurn?'activate':''">
+            <div id="hands-cover" v-if="die"></div>
             <h2>hands</h2>
             <h2 v-if="myTurn" id="pass-button" @click="passTurn()" class="right">패스하기</h2>
             <div class="card" :class="`${card.color} ${card.activate?'activate':''}`" v-for="(card, idx) in hands" @click="activate(idx)"></div>
@@ -81,16 +82,17 @@
             title: null,
             users: [],
             game: null,
-            hands: [],
             inGame: false,
+            hands: [],
+            die: null,
             selectedColor: null,
             myTurn: false,
             waitingRound: false,
         },
-        created() {
+        async created() {
             const socket = io();
 
-            socket.on('connection', () => {
+            socket.on('connection', async () => {
 
                 let name = getCookie('online-vodka-username');
                 while(name === null || name === ''){
@@ -100,7 +102,7 @@
                 setCookie('online-vodka-username', name, 1);
                 socket.emit('join', name, id);
 
-                this.updateData();
+                await this.updateData();
             });
 
             socket.on('update', () => {
@@ -164,18 +166,20 @@
                     }
                 }
 
-                this.hands = [];
                 this.inGame = false;
+                this.die = false;
+                this.hands = [];
                 for(let player of this.game.players){
                     if(player.name === this.username){
                         this.inGame = true;
+                        this.die = player.die;
                         this.hands = player.hands;
                         this.hands.sort((a, b) => a.color > b.color ? 1 : a.color < b.color ? -1 : 0);
                         break;
                     }
                 }
 
-                this.myTurn = this.game.players[this.game.turn].name === this.username;
+                this.myTurn = this.game.playing && this.game.players[this.game.turn].name === this.username;
             },
             countCard(cardList) {
                 let cnt = 0;
@@ -198,7 +202,7 @@
             joinGame() {
                 axios.post('/api/game/join', {
                     id,
-                    username: this.inGame ? '$bot' : this.username,
+                    username: this.me ? '$bot' : this.username,
                 }).then((res) => {
                     if(res.data.error){
                         alert(res.data.error);
@@ -224,7 +228,7 @@
 
                 axios.post('/api/game/join', {
                     id,
-                    username: this.inGame ? '$bot' : this.username,
+                    username: this.me ? '$bot' : this.username,
                     idx,
                 }).then((res) => {
                     if(res.data.error){

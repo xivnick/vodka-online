@@ -257,30 +257,40 @@ class PenguinParty {
             return '다른 플레이어의 차례예요.';
         }
 
+        // 다음 차례 플레이어 찾기
         let series = 0;
         while(true){
+            // 턴 한칸 뒤로 / 사람수 넘어가면 초기화
             this.turn++;
             if(this.turn === this.players.length) this.turn = 0;
 
+            // 다음 차례가 가능한가?
             let nextPlay = false;
 
-            const nextHands = this.players[this.turn].hands;
+            // 죽지 않았을때만 체크
+            if(!this.players[this.turn].die){
+                // 다음 턴 손 확인하기
+                const nextHands = this.players[this.turn].hands;
 
-            for(let card of nextHands){
-                for(let r = 0; r < 8 && !nextPlay; r++){
-                    for(let c = 0; c < this.board[r].length && !nextPlay; c++){
-                        if(this.validPlace(card.color, r, c)){
-                            nextPlay = true;
-                            break;
+                for(let card of nextHands){
+                    for(let r = 0; r < 8 && !nextPlay; r++){
+                        for(let c = 0; c < this.board[r].length && !nextPlay; c++){
+                            if(this.validPlace(card.color, r, c)){
+                                // 놓을 곳이 있으면
+                                nextPlay = true;
+                                break;
+                            }
                         }
                     }
+                    if(nextPlay) break;
                 }
+                // 할 수 았는 경우
                 if(nextPlay) break;
+
+                // 할 수 없는 경우
+                this.players[this.turn].die = true;
             }
-            if(nextPlay){
-                series = 0;
-                break;
-            }
+
             series++;
             if(series === this.players.length){
                 return this.endRound();

@@ -158,9 +158,17 @@ button:hover {
       line-height: 14px; }
 
 #hands {
+  position: relative;
   padding: 40px 32px 8px 46px;
   min-height: 100px;
   margin-bottom: 10px; }
+  #hands #hands-cover {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.1); }
   #hands #pass-button {
     color: #666;
     font-size: 12px;
