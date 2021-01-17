@@ -11,9 +11,6 @@ class PenguinPartyAI {
     constructor(gameId, botIndex) {
         this.gameId = gameId;
         this.botIndex = botIndex;
-
-        console.log(this.gameId);
-        console.log(this.botIndex);
     }
 
     async play() {
